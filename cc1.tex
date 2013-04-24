@@ -1,0 +1,400 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{fullpage}
+
+\begin{document}
+
+\section{Stochastic Volatility Model}
+Define the model as follows.
+\begin{equation}
+\begin{cases}
+y_{t+1} = y_t + \mu\Delta + \sqrt{v_t\Delta} \epsilon^y_{t+1} \\
+v_{t+1} = v_t + \kappa(\theta-v_t)\Delta + \sigma_v\sqrt{v_t\Delta}\epsilon^v_{t+1}
+\end{cases}
+\end{equation}
+
+\begin{align}
+\epsilon^y_{t+1} &\sim N(0,1) \nonumber \\
+\epsilon^v_{t+1} &\sim N(0,1) \nonumber \\
+corr&(\epsilon^y_{t+1},\epsilon^v_{t+1}) = \rho
+\end{align}
+We have observations, $(y_t)^{T}_{t=0}$, latent volatility parameters, $(v_t)^{T}_{t=0}$,
+and model parameters, $\Theta = \{\mu,\kappa,\theta,\sigma_v,\rho\}$. \\ \\
+We can also write the model as follows.
+\begin{equation}
+\left(\begin{array}{c}
+y_{t+1}-y_t \\
+v_{t+1}-v_t\end{array}\right)|v_t,\Theta \sim 
+\mathcal N \left(\left[\begin{array}{c}\mu\Delta \\ \kappa(\theta-v_t)\Delta \end{array}\right],
+v_t\Delta\left[\begin{array}{cc} 1 & \sigma_v\rho \\ \sigma_v\rho & \sigma^2_v \end{array}\right]\right)
+\end{equation}
+
+\small
+\begin{flalign}
+&\prod^{T-1}_{t=0}{p(y_{t+1}-y_{t},v_{t+1}-v_t|v_t,\Theta)} \nonumber &\\
+=&\prod^{T-1}_{t=0}{\frac{1}{2\pi v_t\Delta \sigma_v \sqrt{1-\rho^2}}} \times exp\left[-\frac{1}{2(1-\rho^2)}\left(\frac{{(y_{t+1}-y_t-\mu\Delta)}^2}{v_t\Delta}
+-\frac{2\rho(y_{t+1}-y_t-\mu\Delta)(v_{t+1}-v_t-\kappa(\theta-v_t)\Delta)}{v_t\Delta\sigma_v} \right.\right. &\\
+&\left.\left.+\frac{{(v_{t+1}-v_t-\kappa(\theta-v_t)\Delta)}^2}
+{v_t\Delta\sigma^2_v} \right)\right] \nonumber & 
+\end{flalign}
+
+\normalsize
+\section{Prior Distributions}
+Consider the following prior distributions.
+\begin{align*}
+\mu &\sim N(0,F^2) \\
+\kappa &\sim N(0,G^2) \text{ truncated at 0}\\
+\theta &\sim N(0,H^2) \text{ truncated at 0}
+\end{align*}
+
+Following Jacquier, Polson, Rossi (1994), reparameterize $(\rho,\sigma_v)$ as $(\phi_v,\omega_v)$.
+\begin{equation}
+\begin{cases}
+\phi_v = \sigma_v \rho \\
+\omega_v = \sigma^2_v(1-\rho^2)
+\end{cases}
+\end{equation}
+
+Choose the following prior distributions.
+\begin{align*}
+\phi_v|\omega_v &\sim N(0,\frac{1}{2}{\omega_v}) \\
+\omega_v &\sim IG(a,b)
+\end{align*}
+
+Note that:
+
+\begin{align}
+&\omega_v+\phi_v^2=\sigma_v^2(1-\rho^2)+\sigma_v^2\rho^2 =\sigma_v^2\\
+&\rho=\frac{\phi_v}{\sigma_v}=\frac{\phi_v}{\sqrt{\omega_v+\phi_v^2}}
+\end{align}
+
+To recover the original parameterization set:
+
+\begin{equation}
+\begin{cases}
+\sigma_v^2=\omega_v+\phi_v^2 \\
+\rho = \frac{\phi_v}{\sqrt{\omega_v+\phi_v^2}}
+\end{cases}
+\end{equation}
+
+\section{Joint Distribution}
+
+\begin{equation}
+p(y,v,\Theta) = p(y,v|\Theta)p(\Theta)
+\end{equation}
+
+\begin{align}
+p(\Theta) &= p(\mu)p(\kappa)p(\theta)p(\phi_v|\omega_v)p(\omega_v) \\
+&= \left(\frac{1}{\sqrt{2\pi}F}e^{\frac{-(\mu-f)^2}{2F^2}}\right)\left(\frac{\frac{1}{G}\phi(\frac{\kappa-g}{G})}{1-\Phi(-\frac{\kappa}{G})}\right)1_{\kappa >0}
+\left(\frac{\frac{1}{G}\phi(\frac{\theta-g}{G})}{1-\Phi(-\frac{\theta}{G})}\right)1_{\theta >0}\left(\frac{1}{\sqrt{\pi\omega_v}}e^{\frac{-\phi_v^2}{\omega_v}}\right)
+\left(\frac{1}{b^a\Gamma(a)}\omega^{a-1}e^{\frac{-\omega_v}{b}}\right)
+\end{align}
+\\
+Refer to Equation (3) for $p(y,v|\Theta)$.
+
+\section{Posterior Distributions}
+
+\subsection{Marginal Posterior Distribution of $\mu$}
+
+\begin{flalign}
+&p(\mu|\kappa,\theta,\sigma_v,\rho,y,v) \nonumber &\\
+\propto& p(y,v|\mu,\kappa,\theta,\sigma_v,\rho)p(\mu) &\\
+=& \prod^{T-1}_{t=0}{\frac{1}{2\pi v_t\Delta \sigma_v \sqrt{1-\rho^2}}} exp\left[-\frac{1}{2(1-\rho^2)}\left(\frac{{(y_{t+1}-y_t-\mu\Delta)}^2}{v_t\Delta}
+-\frac{2\rho(y_{t+1}-y_t-\mu\Delta)(v_{t+1}-v_t-\kappa(\theta-v_t)\Delta)}{v_t\Delta\sigma_v}\right.\right.  &\\
+&\left.\left.+\frac{{(v_{t+1}-v_t-\kappa(\theta-v_t)\Delta)}^2}{v_t\Delta\sigma^2_v} \right)\right]\left(\frac{1}{\sqrt{2\pi}F}e^{\frac{-(\mu-f)^2}{2F^2}}\right) \nonumber &\\
+\propto& exp \left[-\frac{1}{2(1-\rho^2)}\left(\sum^{T-1}_{t=0}\frac{{(y_{t+1}-y_t-\mu\Delta)}^2}{v_t\Delta}
+-2\rho\sum^{T-1}_{t=0}\frac{(y_{t+1}-y_t-\mu\Delta)(v_{t+1}-v_t-\kappa(\theta-v_t)\Delta)}{v_t\Delta\sigma_v}
+\right)-\frac{(\mu-f)^2}{2F^2}\right] &
+\end{flalign}
+
+\begin{align}
+\text{Let } C_{t+1}=&y_{t+1}-y_{t} \text{, and } D_{t+1}=v_{t+1}-v_{t}-\kappa(\theta-v_t)\Delta
+\end{align}
+
+\begin{flalign}
+=&exp \left[-\frac{1}{2(1-\rho^2)}\left(\sum^{T-1}_{t=0}\frac{{(C_{t+1}-\mu\Delta)}^2}{v_t\Delta}
+-2\rho\sum^{T-1}_{t=0}\frac{(C_{t+1}-\mu\Delta)D_{t+1}}{v_t\Delta\sigma_v}\right)-\frac{(\mu-f)^2}{2F^2}\right] &\\
+=&exp \left[-\frac{1}{2(1-\rho^2)}\left(\sum^{T-1}_{t=0}\frac{C_{t+1}^2-2C_{t+1}\mu\Delta+(\mu\Delta)^2}{v_t\Delta}\right)
++\frac{\rho}{1-\rho^2}\left(\sum^{T-1}_{t=0}\frac{C_{t+1}D_{t+1}-\mu\Delta D_{t+1}}{v_t\Delta\sigma_v}\right)-\frac{(\mu-f)^2}{2F^2}{2}\right] &\\
+\propto&\exp \left[-\frac{1}{2(1-\rho^2)}\left(\sum^{T-1}_{t=0}\frac{-2C_{t+1}\mu\Delta+(\mu\Delta)^2}{v_t\Delta}\right)
++\frac{\rho}{1-\rho^2}\left(\sum^{T-1}_{t=0}\frac{-\mu\Delta D_{t+1}}{v_t\Delta\sigma_v}\right)-\frac{\mu^2-2\mu f+f^2}{2F^2}\right] &\\
+=&\exp \left[\left\{-\frac{1}{2(1-\rho^2)}\left(\sum^{T-1}_{t=0}\frac{\Delta^2}{v_t\Delta}\right)-\frac{1}{2F^2}\right\}\mu^2
++\left\{-\frac{1}{2(1-\rho^2)}\left(\sum^{T-1}_{t=0}\frac{-2C_{t+1}\Delta}{v_t\Delta}\right)+\frac{\rho}{1-\rho^2}
+\left(\sum^{T-1}_{t=0}\frac{-\Delta D_{t+1}}{v_t\Delta\sigma_v}\right)+\frac{f}{F^2}\right\}\mu\right] &\\
+=&\exp \left[-\frac{1}{2}\left\{\frac{\Delta}{1-\rho^2}\left(\sum^{T-1}_{t=0}\frac{1}{v_t}\right)+\frac{1}{F^2}\right\}\mu^2
++\left\{\frac{1}{2(1-\rho^2)}\left(\sum^{T-1}_{t=0}\frac{2C_{t+1}}{v_t}\right)-\frac{\rho}{1-\rho^2}
+\left(\sum^{T-1}_{t=0}\frac{D_{t+1}}{v_t\sigma_v}\right)+\frac{f}{F^2}\right\}\mu\right] &
+\end{flalign}
+
+\begin{align}
+\text{Let }W=&\frac{\Delta}{1-\rho^2}\left(\sum^{T-1}_{t=0}\frac{1}{v_t}\right)+\frac{1}{F^2} \\
+\text{Let }S=&\frac{1}{2(1-\rho^2)}\left(\sum^{T-1}_{t=0}\frac{2C_{t+1}}{v_t}\right)-\frac{\rho}{1-\rho^2}\left(\sum^{T-1}_{t=0}\frac{D_{t+1}}{v_t\sigma_v}\right)+\frac{f}{F^2} \nonumber \\
+=&\frac{1}{1-\rho^2}\left(\sum^{T-1}_{t=0}\frac{1}{v_t}\left[C_{t+1}-\rho\frac{D_{t+1}}{\sigma_v}\right]\right)+\frac{f}{F^2}
+\end{align}
+
+\begin{flalign}
+=&exp\left[-\frac{1}{2}W\mu^2+S\mu\right] &\\
+=&exp\left[-\frac{1}{2}\left(W\mu^2-2S\mu\right)\right] &\\
+=&exp\left[-\frac{1}{2}W\left(\mu^2-2\frac{S}{W}\mu\right)\right] &\\
+=&exp\left[-\frac{1}{2}W\left(\mu^2-2\frac{S}{W}\mu+\left\{\frac{S}{W}\right\}^2-\left\{\frac{S}{W}\right\}^2\right)\right] &\\
+=&exp\left[-\frac{1}{2}W\left(\left\{\mu-\frac{S}{W}\right\}^2-\left\{\frac{S}{W}\right\}^2\right)\right] &\\
+\propto&exp\left[-\frac{1}{2}\frac{\left(\mu-\frac{S}{W}\right)^2}{\frac{1}{W}}\right] &\\
+\end{flalign}
+
+\begin{equation*}
+\mu\sim N\left(\frac{S}{W},\frac{1}{W}\right) \text{  , where $W$ and $S$ are defined in Equations (21) and (22).}
+\end{equation*}
+
+\subsection{Marginal Posterior Distribution of $\kappa$}
+
+\begin{flalign}
+&p(\kappa|\mu,\theta,\sigma_v,\rho,y,v) \nonumber &\\
+\propto& p(y,v|\mu,\kappa,\theta,\sigma_v,\rho)p(\kappa) &\\
+=& \prod^{T-1}_{t=0}{\frac{1}{2\pi v_t\Delta \sigma_v \sqrt{1-\rho^2}}}exp\left[-\frac{1}{2(1-\rho^2)}\left(\frac{{(y_{t+1}-y_t-\mu\Delta)}^2}{v_t\Delta}-\frac{2\rho(y_{t+1}-y_t-\mu\Delta)(v_{t+1}-v_t-\kappa(\theta-v_t)\Delta)}{v_t\Delta\sigma_v}\right.\right.& \nonumber \\
+& +\left.\left.\frac{{(v_{t+1}-v_t-\kappa(\theta-v_t)\Delta)}^2}{v_t\Delta\sigma^2_v} \right)\right] \left(\frac{2}{\sqrt{2\pi}}e^{-\kappa^2/2}\right) 1_{\kappa >0}\nonumber &\\
+\propto& exp \left[-\frac{1}{2(1-\rho^2)}\left(
+-2\rho\sum^{T-1}_{t=0}\frac{(y_{t+1}-y_t-\mu\Delta)(v_{t+1}-v_t-\kappa(\theta-v_t)\Delta)}{v_t\Delta\sigma_v}
++\sum^{T-1}_{t=0}\frac{{(v_{t+1}-v_t-\kappa(\theta-v_t)\Delta)}^2}{v_t\Delta\sigma^2_v}\right)-\frac{\kappa^2}{2}\right]1_{\kappa >0} &
+\end{flalign}
+
+\begin{align}
+\text{Let } C_{t+1}=&y_{t+1}-y_{t}-\mu\Delta \text{, and } D_{t+1}=v_{t+1}-v_{t}
+\end{align}
+
+\begin{flalign}
+=&exp \left[-\frac{1}{2(1-\rho^2)}\left(-2\rho\sum^{T-1}_{t=0}\frac{C_{t+1}(D_{t+1}-\kappa(\theta-v_t)\Delta)}{v_t\Delta\sigma_v}
++\sum^{T-1}_{t=0}\frac{{(D_{t+1}-\kappa(\theta-v_t)\Delta)}^2}{v_t\Delta\sigma^2_v}\right)-\frac{\kappa^2}{2}\right]1_{\kappa >0}  &\\
+=&exp \left[\frac{\rho}{1-\rho^2}\left(\sum^{T-1}_{t=0}\frac{C_{t+1}D_{t+1}-C_{t+1}\kappa(\theta-v_t)\Delta}{v_t\Delta\sigma_v}\right)
+-\frac{1}{2(1-\rho^2)}\left(\sum^{T-1}_{t=0}\frac{D_{t+1}^2-2D_{t+1}\kappa(\theta-v_t)\Delta+\kappa^2(\theta-v_t)^2\Delta^2}{v_t\Delta\sigma_v^2}\right)-\frac{\kappa^2}{2}\right]1_{\kappa >0} &\\
+\propto &exp \left[\frac{\rho}{1-\rho^2}\left(\sum^{T-1}_{t=0}\frac{-C_{t+1}\kappa(\theta-v_t)\Delta}{v_t\Delta\sigma_v}\right)
+-\frac{1}{2(1-\rho^2)}\left(\sum^{T-1}_{t=0}\frac{-2D_{t+1}\kappa(\theta-v_t)\Delta+\kappa^2(\theta-v_t)^2\Delta^2}{v_t\Delta\sigma_v^2}\right)-\frac{\kappa^2}{2}\right]1_{\kappa >0} &\\
+=&exp \left[ \left\{ -\frac{1}{2(1-\rho)^2}\left(\sum^{T-1}_{t=0}\frac{(\theta-v_t)^2\Delta^2}{v_t\Delta\sigma_v^2}\right)-\frac{1}{2}\right\}\kappa^2
++\left\{\frac{\rho}{1-\rho^2}\left(\sum^{T-1}_{t=0}\frac{-C_{t+1}(\theta-v_t)\Delta}{v_t\Delta\sigma_v}\right)
+-\frac{1}{2(1-\rho^2)}\left(\sum^{T-1}_{t=0}\frac{-2D_{t+1}(\theta-v_t)\Delta}{v_t\Delta\sigma_v^2}\right)\right\}\kappa\right]1_{\kappa >0} &\\
+=&exp\left[-\frac{1}{2}\left\{\frac{\Delta}{\sigma_v^2(1-\rho^2)}\left(\sum^{T-1}_{t=0}\frac{(\theta-v_t)^2}{v_t}\right)+1\right\}\kappa^2
++\left\{\frac{1}{2\sigma_v^2(1-\rho^2)}\left(\sum^{T-1}_{t=0}\frac{2D_{t+1}(\theta-v_t)}{v_t}\right)-\frac{\rho}{\sigma_v(1-\rho^2)}\left(\sum^{T-1}_{t=0}\frac{C_{t+1}(\theta-v_t)}{v_t}\right)\right\}\kappa\right]1_{\kappa >0} &
+\end{flalign}
+
+\begin{align}
+\text{Let }W=&\frac{\Delta}{\sigma_v^2(1-\rho^2)}\left(\sum^{T-1}_{t=0}\frac{(\theta-v_t)^2}{v_t}\right)+1 \\
+\text{Let }S=&\frac{1}{2\sigma_v^2(1-\rho^2)}\left(\sum^{T-1}_{t=0}\frac{2D_{t+1}(\theta-v_t)}{v_t}\right)-\frac{\rho}{\sigma_v(1-\rho^2)}\left(\sum^{T-1}_{t=0}\frac{C_{t+1}(\theta-v_t)}{v_t}\right) \nonumber \\
+=&\frac{1}{\sigma_v(1-\rho^2)}\left(\sum^{T-1}_{t=0}\frac{\theta-v_t}{v_t}\left[\frac{D_{t+1}}{\sigma_v}-\rho C_{t+1}\right]\right)
+\end{align}
+
+\begin{flalign}
+=&exp\left[-\frac{1}{2}W\kappa^2+S\kappa\right]1_{\kappa >0} &\\
+=&exp\left[-\frac{1}{2}\left(W\kappa^2-2S\kappa\right)\right]1_{\kappa >0} &\\
+=&exp\left[-\frac{1}{2}W\left(\kappa^2-2\frac{S}{W}\kappa\right)\right]1_{\kappa >0} &\\
+=&exp\left[-\frac{1}{2}W\left(\kappa^2-2\frac{S}{W}\kappa+\left\{\frac{S}{W}\right\}^2-\left\{\frac{S}{W}\right\}^2\right)\right]1_{\kappa >0} &\\
+=&exp\left[-\frac{1}{2}W\left(\left\{\kappa-\frac{S}{W}\right\}^2-\left\{\frac{S}{W}\right\}^2\right)\right]1_{\kappa >0} &\\
+\propto&exp\left[-\frac{1}{2}\frac{\left(\kappa-\frac{S}{W}\right)^2}{\frac{1}{W}}\right]1_{\kappa >0} &\\
+\end{flalign}
+
+\normalsize
+\begin{equation*}
+\kappa\sim N\left(\frac{S}{W},\frac{1}{W}\right)1_{\kappa >0} \text{  , where $W$ and $S$ are defined in Equations (38) and (39).}
+\end{equation*}
+
+\subsection{Marginal Posterior Distribution of $\theta$}
+
+\tiny
+\begin{flalign}
+&p(\theta|\mu,\kappa,\sigma_v,\rho,y,v) \nonumber &\\
+\propto& p(y,v|\mu,\kappa,\theta,\sigma_v,\rho)p(\theta) &\\
+=& \left\{\prod^{T-1}_{t=0}{\frac{1}{2\pi v_t\Delta \sigma_v \sqrt{1-\rho^2}}} \times exp\left[-\frac{1}{2(1-\rho^2)}\left(\frac{{(y_{t+1}-y_t-\mu\Delta)}^2}{v_t\Delta}
+-\frac{2\rho(y_{t+1}-y_t-\mu\Delta)(v_{t+1}-v_t-\kappa(\theta-v_t)\Delta)}{v_t\Delta\sigma_v}+\frac{{(v_{t+1}-v_t-\kappa(\theta-v_t)\Delta)}^2}
+{v_t\Delta\sigma^2_v} \right)\right] \right\}&\\
+&\times\left(\frac{2}{\sqrt{2\pi}}e^{-\theta^2/2}\right)1_{\theta >0} \nonumber &\\
+\propto& exp \left[-\frac{1}{2(1-\rho^2)}\left(
+-2\rho\sum^{T-1}_{t=0}\frac{(y_{t+1}-y_t-\mu\Delta)(v_{t+1}-v_t-\kappa(\theta-v_t)\Delta)}{v_t\Delta\sigma_v}
++\sum^{T-1}_{t=0}\frac{{(v_{t+1}-v_t-\kappa(\theta-v_t)\Delta)}^2}{v_t\Delta\sigma^2_v}\right)-\frac{\theta^2}{2}\right]1_{\theta >0} &
+\end{flalign}
+
+\begin{align}
+\text{Let } C_{t+1}=&y_{t+1}-y_{t}-\mu\Delta \text{, and } D_{t+1}=v_{t+1}-v_{t}
+\end{align}
+
+\begin{flalign}
+=&exp \left[-\frac{1}{2(1-\rho^2)}\left(-2\rho\sum^{T-1}_{t=0}\frac{C_{t+1}(D_{t+1}-\kappa(\theta-v_t)\Delta)}{v_t\Delta\sigma_v}
++\sum^{T-1}_{t=0}\frac{{(D_{t+1}-\kappa(\theta-v_t)\Delta)}^2}{v_t\Delta\sigma^2_v}\right)-\frac{\theta^2}{2}\right]1_{\theta >0}  &\\
+=&exp \left[\frac{\rho}{1-\rho^2}\left(\sum^{T-1}_{t=0}\frac{C_{t+1}D_{t+1}-C_{t+1}\kappa(\theta-v_t)\Delta}{v_t\Delta\sigma_v}\right)
+-\frac{1}{2(1-\rho^2)}\left(\sum^{T-1}_{t=0}\frac{D_{t+1}^2-2D_{t+1}\kappa(\theta-v_t)\Delta+\kappa^2(\theta-v_t)^2\Delta^2}{v_t\Delta\sigma_v^2}\right)-\frac{\theta^2}{2}\right]1_{\theta >0} &\\
+\propto &exp \left[\frac{\rho}{1-\rho^2}\left(\sum^{T-1}_{t=0}\frac{-C_{t+1}\kappa(\theta-v_t)\Delta}{v_t\Delta\sigma_v}\right)
+-\frac{1}{2(1-\rho^2)}\left(\sum^{T-1}_{t=0}\frac{-2D_{t+1}\kappa(\theta-v_t)\Delta+\kappa^2(\theta-v_t)^2\Delta^2}{v_t\Delta\sigma_v^2}\right)-\frac{\theta^2}{2}\right]1_{\theta >0} &\\
+=&exp \left[\frac{\rho}{1-\rho^2}\left(\sum^{T-1}_{t=0}\frac{-C_{t+1}\kappa\Delta\theta+C_{t+1}\kappa\Delta}{v_t\Delta\sigma_v}\right)
+-\frac{1}{2(1-\rho^2)}\left(\sum^{T-1}_{t=0}\frac{-2D_{t+1}\kappa\Delta\theta+2D_{t+1}v_t\Delta+\kappa^2\Delta^2\theta^2-2\kappa^2\Delta^2\theta v_t+\kappa^2\Delta^2 v_t^2}{v_t\Delta\sigma_v^2}\right)-\frac{\theta^2}{2}\right]1_{\theta >0} &\\
+\propto &exp \left[\frac{\rho}{1-\rho^2}\left(\sum^{T-1}_{t=0}\frac{-C_{t+1}\kappa\Delta\theta}{v_t\Delta\sigma_v}\right)
+-\frac{1}{2(1-\rho^2)}\left(\sum^{T-1}_{t=0}\frac{-2D_{t+1}\kappa\Delta\theta+\kappa^2\Delta^2\theta^2-2\kappa^2\Delta^2\theta v_t}{v_t\Delta\sigma_v^2}\right)-\frac{\theta^2}{2}\right]1_{\theta >0} &\\
+=&exp\left[\left\{-\frac{1}{2(1-\rho^2)}\left(\sum^{T-1}_{t=0}\frac{\kappa^2\Delta^2}{v_t\Delta\sigma_v^2}\right)-\frac{1}{2}\right\}\theta^2
++\left\{\frac{\rho}{1-\rho^2}\left(\sum^{T-1}_{t=0}\frac{-C_{t+1}+\kappa\Delta}{v_t\Delta\sigma_v}\right)-\frac{1}{2(1-\rho^2)}\left(\sum^{T-1}_{t=0}\frac{-2D_{t+1}\kappa\Delta-2\kappa^2\Delta^2 v_t}{v_t\Delta\sigma_v^2}\right)\right\}\theta\right]1_{\theta >0} &\\
+=&exp\left[-\frac{1}{2}\left\{\frac{\kappa^2\Delta}{\sigma_v^2(1-\rho^2)}\left(\sum^{T-1}_{t=0}\frac{1}{v_t}\right)+1\right\}\theta^2
++\left\{\frac{1}{2\sigma_v^2(1-\rho^2)}\left(\sum^{T-1}_{t=0}\frac{2D_{t+1}\kappa+2\kappa^2\Delta v_t}{v_t}\right)-\frac{\rho}{\sigma_v(1-\rho^2)}\left(\sum^{T-1}_{t=0}\frac{C_{t+1}\kappa}{v_t}\right)\right\}\theta\right]1_{\theta >0} &
+\end{flalign}
+
+\begin{align}
+\text{Let }W=&\frac{\kappa^2\Delta}{\sigma_v^2(1-\rho^2)}\left(\sum^{T-1}_{t=0}\frac{1}{v_t}\right)+1 \\
+\text{Let }S=&\frac{1}{2\sigma_v^2(1-\rho^2)}\left(\sum^{T-1}_{t=0}\frac{2D_{t+1}\kappa+2\kappa^2\Delta v_t}{v_t}\right)-\frac{\rho}{\sigma_v(1-\rho^2)}\left(\sum^{T-1}_{t=0}\frac{C_{t+1}\kappa}{v_t}\right) \nonumber \\
+=&\frac{\kappa}{\sigma_v(1-\rho^2)}\left(\sum^{T-1}_{t=0}\frac{1}{v_t}\left[\frac{D_{t+1}+\kappa\Delta v_t}{\sigma_v}-\rho C_{t+1}\right]\right)
+\end{align}
+
+\begin{flalign}
+=&exp\left[-\frac{1}{2}W\theta^2+S\theta\right]1_{\theta >0} &\\
+=&exp\left[-\frac{1}{2}\left(W\theta^2-2S\theta\right)\right]1_{\theta >0} &\\
+=&exp\left[-\frac{1}{2}W\left(\theta^2-2\frac{S}{W}\theta\right)\right]1_{\theta >0} &\\
+=&exp\left[-\frac{1}{2}W\left(\theta^2-2\frac{S}{W}\theta+\left\{\frac{S}{W}\right\}^2-\left\{\frac{S}{W}\right\}^2\right)\right]1_{\theta >0} &\\
+=&exp\left[-\frac{1}{2}W\left(\left\{\theta-\frac{S}{W}\right\}^2-\left\{\frac{S}{W}\right\}^2\right)\right]1_{\theta >0} &\\
+\propto&exp\left[-\frac{1}{2}\frac{\left(\theta-\frac{S}{W}\right)^2}{\frac{1}{W}}\right]1_{\theta >0} &\\
+\end{flalign}
+
+\normalsize
+\begin{equation*}
+\theta\sim N\left(\frac{S}{W},\frac{1}{W}\right)1_{\theta >0} \text{  , where $W$ and $S$ are defined in Equations (58) and (59).}
+\end{equation*}
+
+\subsection{Joint Posterior Distribution of $(\phi_v,\omega_v)$}
+
+\tiny
+\begin{flalign}
+&p(\phi_v,\omega_v|\mu,\kappa,\theta,y,v) \nonumber &\\
+\propto& p(y,v|\mu,\kappa,\theta,\phi_v,\omega_v)p(\phi_v|\omega_v)p(\omega_v) &\\
+&\text{Using the result in Equation (7)} \nonumber &\\
+=&\left\{\prod^{T-1}_{t=0}\frac{1}{2\pi v_t \Delta \sqrt{\omega_v + \phi_v^2}\sqrt{1-\frac{\phi_v^2}{\omega_v + \phi_v^2}}}\right. &\\
+&\left.\times exp\left[ -\frac{1}{2\left(1-\frac{\phi_v^2}{\omega_v+\phi_v^2}\right)}
+\left(\frac{(y_{t+1}-y_t-\mu\Delta)^2}{v_t\Delta}-\frac{2\phi_v(y_{t+1}-y_t-\mu\Delta)(v_{t+1}-v_t-\kappa(\theta-v_t)\Delta)}{(\omega_v+\phi_v^2) v_t\Delta}
++\frac{(v_{t+1}-v_t-\kappa(\theta-v_t)\Delta)^2}{(\omega_v+\phi_v^2)v_t \Delta}\right)\right] \right\}&\\
+&\times\left(\frac{1}{\sqrt{\pi\omega_v}}e^{-\phi_v^2/\omega_v}\right)\left(\frac{200^2e^{-200/\omega_v}}{\Gamma(2)\omega_v^3}\right) &\\
+\propto&\left\{\prod^{T-1}_{t=0}\frac{1}{\sqrt{\omega_v}}exp\left[-\frac{\omega_v+\phi_v^2}{2\omega_v}\left(\frac{(y_{t+1}-y_t-\mu\Delta)^2}{v_t\Delta}-\frac{2\phi_v(y_{t+1}-y_t-\mu\Delta)(v_{t+1}-v_t-\kappa(\theta-v_t)\Delta)}{(\omega_v+\phi_v^2) v_t\Delta}
++\frac{(v_{t+1}-v_t-\kappa(\theta-v_t)\Delta)^2}{(\omega_v+\phi_v^2)v_t \Delta} \right)\right] \right\}&\\
+&\times\left(\frac{1}{\sqrt{\omega_v}}e^{-\phi_v^2/\omega_v} \right)\left(\frac{e^{-200/\omega_v}}{\omega_v^3}\right) &
+\end{flalign}
+
+\begin{align}
+\text{Let } C_{t+1}=&\frac{y_{t+1}-y_{t}-\mu\Delta}{\sqrt{v_t\Delta}} \text{, and } D_{t+1}=\frac{v_{t+1}-v_{t}-\kappa(\theta-v_t)\Delta}{\sqrt{v_t\Delta}}
+\end{align}
+
+\begin{flalign}
+=&\left\{\prod^{T-1}_{t=0}\frac{1}{\sqrt{\omega_v}}exp\left[-\frac{\omega_v+\phi_v^2}{2\omega_v}\left(C_{t+1}^2-\frac{2\phi_v C_{t+1}D_{t+1}}{\omega_v+\phi_v^2}
++\frac{D_{t+1}^2}{\omega_v+\phi_v^2} \right)\right]\right\}\left(\frac{1}{\sqrt{\omega_v}}e^{-\phi_v^2/\omega_v} \right)\left(\frac{e^{-200/\omega_v}}{\omega_v^3}\right) &\\
+=&\left(\frac{1}{\omega_v}\right)^\frac{T+7}{2} exp\left[\left(\sum^{T-1}_{t=0}-\frac{C_{t+1}^2}{2}-\frac{\phi_v^2 C_{t+1}^2}{2\omega_v} + \frac{\phi_v C_{t+1}D_{t+1}}{\omega_v} - \frac{D_{t+1}^2}{2\omega_v}\right)
+-\frac{\phi_v^2}{\omega_v}-\frac{200}{\omega_v}\right] &\\
+\propto&\left(\frac{1}{\omega_v}\right)^\frac{T+7}{2} exp\left[\left(\sum^{T-1}_{t=0}-\frac{\phi_v^2 C_{t+1}^2}{2\omega_v} + \frac{\phi_v C_{t+1}D_{t+1}}{\omega_v} - \frac{D_{t+1}^2}{2\omega_v}\right)
+-\frac{\phi_v^2}{\omega_v}-\frac{200}{\omega_v}\right] &\\
+=&\left(\frac{1}{\omega_v}\right)^\frac{T+7}{2} exp\left[\left\{\left(\sum^{T-1}_{t=0}-\frac{C_{t+1}^2}{2\omega_v}\right)-\frac{1}{\omega_v}\right\}\phi_v^2
++\left\{\sum^{T-1}_{t=0}\frac{C_{t+1}D_{t+1}}{\omega_v}\right\}\phi_v + \left(\sum^{T-1}_{t=0}-\frac{D_{t+1}^2}{2\omega_v}\right)-\frac{200}{\omega_v}\right] &\\
+=&exp\left[\left\{\left(\sum^{T-1}_{t=0}-\frac{C_{t+1}^2}{2\omega_v}\right)-\frac{1}{\omega_v}\right\}\phi_v^2
++\left\{\sum^{T-1}_{t=0}\frac{C_{t+1}D_{t+1}}{\omega_v}\right\}\phi_v\right]\left(\frac{1}{\omega_v}\right)^\frac{T+7}{2} exp\left[\left(\sum^{T-1}_{t=0}-\frac{D_{t+1}^2}{2\omega_v}\right)-\frac{200}{\omega_v} \right] &\\
+=&exp\left[-\frac{1}{2\omega_v}\left\{\left(\sum^{T-1}_{t=0}C_{t+1}^2\right)+2\right\}\phi_v^2+\left\{\frac{\sum^{T-1}_{t=0}C_{t+1}D_{t+1}}{\omega_v}\right\}\phi_v\right]
+\left(\frac{1}{\omega_v}\right)^{\frac{T+5}{2}+1} exp\left[-\frac{1}{\omega_v}\left\{\left(\sum^{T-1}_{t=0}\frac{D_{t+1}^2}{2}\right)+200 \right\}\right] &
+\end{flalign}
+
+\begin{align}
+\text{Let }W=&\left(\sum^{T-1}_{t=0}C_{t+1}^2\right)+2 \\
+\text{Let }S=&\frac{\sum^{T-1}_{t=0}C_{t+1}D_{t+1}}{\omega_v} \\
+\text{Let }U=&\left(\sum^{T-1}_{t=0}\frac{D_{t+1}^2}{2}\right)+200
+\end{align}
+
+\begin{flalign}
+=&exp\left[-\frac{1}{2\omega_v}W\phi_v^2+S\phi_v\right] \left(\frac{1}{\omega_v}\right)^{\frac{T+5}{2}+1} exp\left[-\frac{U}{\omega_v}\right] &\\
+=&exp\left[-\frac{1}{2\omega_v}\left(W\phi_v^2-2S\phi_v\right)\right] \left(\frac{1}{\omega_v}\right)^{\frac{T+5}{2}+1} exp\left[-\frac{U}{\omega_v}\right]&\\
+=&exp\left[-\frac{1}{2\omega_v}W\left(\phi_v^2-2\frac{S}{W}\phi_v\right)\right] \left(\frac{1}{\omega_v}\right)^{\frac{T+5}{2}+1} exp\left[-\frac{U}{\omega_v}\right]&\\
+=&exp\left[-\frac{1}{2\omega_v}W\left(\phi_v^2-2\frac{S}{W}\phi_v+\left\{\frac{S}{W}\right\}^2-\left\{\frac{S}{W}\right\}^2\right)\right] \left(\frac{1}{\omega_v}\right)^{\frac{T+5}{2}+1} exp\left[-\frac{U}{\omega_v}\right]&\\
+=&exp\left[-\frac{1}{2\omega_v}W\left(\left\{\phi_v-\frac{S}{W}\right\}^2-\left\{\frac{S}{W}\right\}^2\right)\right] \left(\frac{1}{\omega_v}\right)^{\frac{T+5}{2}+1} exp\left[-\frac{U}{\omega_v}\right]&\\
+\propto&exp\left[-\frac{1}{2}\frac{\left(\phi_v-\frac{S}{W}\right)^2}{\frac{\omega_v}{W}}\right] \left(\frac{1}{\omega_v}\right)^{\frac{T+5}{2}+1} exp\left[-\frac{U}{\omega_v}\right]&\\
+\end{flalign}
+
+\normalsize
+\begin{equation*}
+\begin{cases}
+\phi_v|\omega_v\sim N\left(\frac{S}{W},\frac{\omega_v}{W}\right) \text{  , where $W$ and $S$ are defined in Equations (80) and (81).} \\
+\omega_v\sim IG\left(\frac{T+5}{2},U\right) \text{  , where $U$ is defined in Equation (82)}
+\end{cases}
+\end{equation*}
+
+
+\subsection{Posterior Distribution of $v_0$}
+
+\tiny
+\begin{flalign}
+&p(v_0|\mu,\kappa,\theta,\sigma_v,\rho,y,v) \nonumber &\\
+=& p(y_1-y_0,v_1-v_0|v_0) &\\
+=& \frac{1}{2\pi v_0\Delta \sigma_v \sqrt{1-\rho^2}} \times exp\left[-\frac{1}{2(1-\rho^2)}\left(\frac{{(y_1-y_0-\mu\Delta)}^2}{v_0\Delta}
+-\frac{2\rho(y_1-y_0-\mu\Delta)(v_1-v_0-\kappa(\theta-v_0)\Delta)}{v_0\Delta\sigma_v}+\frac{{(v_1-v_0-\kappa(\theta-v_0)\Delta)}^2}
+{v_0\Delta\sigma^2_v} \right)\right] &\\
+\propto& \frac{1}{v_0}exp\left[-\frac{1}{2(1-\rho^2)}\left(\frac{{(y_1-y_0-\mu\Delta)}^2}{v_0\Delta}
+-\frac{2\rho(y_1-y_0-\mu\Delta)(v_1-v_0-\kappa(\theta-v_0)\Delta)}{v_0\Delta\sigma_v}+\frac{{(v_1-v_0-\kappa(\theta-v_0)\Delta)}^2}
+{v_0\Delta\sigma^2_v} \right)\right] &
+\end{flalign}
+
+\subsection{Posterior Distribution of $v_T$}
+
+\tiny
+\begin{flalign}
+&p(v_T|\mu,\kappa,\theta,\sigma_v,\rho,y,v) \nonumber &\\
+=& p(y_T-y_{T-1},v_T-v_{T-1}|v_T) &\\
+=& \frac{1}{2\pi v_{T-1}\Delta \sigma_v \sqrt{1-\rho^2}} &\\
+&\times exp\left[-\frac{1}{2(1-\rho^2)}\left(\frac{{(y_T-y_{T-1}-\mu\Delta)}^2}{v_{T-1}\Delta}
+-\frac{2\rho(y_T-y_{T-1}-\mu\Delta)(v_T-v_{T-1}-\kappa(\theta-v_{T-1})\Delta)}{v_{T-1}\Delta\sigma_v}+\frac{{(v_T-v_{T-1}-\kappa(\theta-v_{T-1})\Delta)}^2}
+{v_{T-1}\Delta\sigma^2_v} \right)\right] &\\
+\propto& exp\left[-\frac{1}{2(1-\rho^2)}\left(-\frac{2\rho(y_T-y_{T-1}-\mu\Delta)(v_T-v_{T-1}-\kappa(\theta-v_{T-1})\Delta)}{v_{T-1}\Delta\sigma_v}
++\frac{{(v_T-v_{T-1}-\kappa(\theta-v_{T-1})\Delta)}^2}{v_{T-1}\Delta\sigma^2_v} \right)\right] &
+\end{flalign}
+
+\subsection{Posterior Distribution of $v_t$}
+
+\tiny
+\begin{flalign}
+&p(v_t|\mu,\kappa,\theta,\sigma_v,\rho,y,v) \nonumber &\\
+=& p(y_{t+1}-y_t,v_{t+1}-v_t|v_t) p(y_t-y_{t-1},v_t-v_{t-1}|v_{t-1})&\\
+=&\prod^{T-1}_{t=0}{\frac{1}{2\pi v_t\Delta \sigma_v \sqrt{1-\rho^2}}} \times exp\left[-\frac{1}{2(1-\rho^2)}\left(\frac{{(y_{t+1}-y_t-\mu\Delta)}^2}{v_t\Delta}
+-\frac{2\rho(y_{t+1}-y_t-\mu\Delta)(v_{t+1}-v_t-\kappa(\theta-v_t)\Delta)}{v_t\Delta\sigma_v}+\frac{{(v_{t+1}-v_t-\kappa(\theta-v_t)\Delta)}^2}
+{v_t\Delta\sigma^2_v} \right)\right] &\\
+&\times \prod^{T-1}_{t=0}{\frac{1}{2\pi v_{t-1}\Delta \sigma_v \sqrt{1-\rho^2}}} &\\
+&\times exp\left[-\frac{1}{2(1-\rho^2)}\left(\frac{{(y_t-y_{t-1}-\mu\Delta)}^2}{v_{t-1}\Delta}
+-\frac{2\rho(y_t-y_{t-1}-\mu\Delta)(v_t-v_{t-1}-\kappa(\theta-v_{t-1})\Delta)}{v_{t-1}\Delta\sigma_v}+\frac{{(v_t-v_{t-1}-\kappa(\theta-v_{t-1})\Delta)}^2}
+{v_{t-1}\Delta\sigma^2_v} \right)\right] &\\
+\propto& \frac{1}{v_t} exp\left[-\frac{1}{2(1-\rho^2)}\left(\frac{{(y_{t+1}-y_t-\mu\Delta)}^2}{v_t\Delta}
+-\frac{2\rho(y_{t+1}-y_t-\mu\Delta)(v_{t+1}-v_t-\kappa(\theta-v_t)\Delta)}{v_t\Delta\sigma_v}+\frac{{(v_{t+1}-v_t-\kappa(\theta-v_t)\Delta)}^2}
+{v_t\Delta\sigma^2_v} \right)\right] &\\
+&\times exp\left[-\frac{1}{2(1-\rho^2)}\left(-\frac{2\rho(y_t-y_{t-1}-\mu\Delta)(v_t-v_{t-1}-\kappa(\theta-v_{t-1})\Delta)}{v_{t-1}\Delta\sigma_v}
++\frac{{(v_t-v_{t-1}-\kappa(\theta-v_{t-1})\Delta)}^2}{v_{t-1}\Delta\sigma^2_v} \right)\right] &
+\end{flalign}
+
+
+\section{Simulation}
+\normalsize
+To simulate a data set from the model, set $\Delta=1$ (so that the data is evenly spaced in time) and set reasonable model parameters according to their prior distributions.
+For the first simulation set:
+\begin{equation}
+\begin{split}
+&\mu=-1.04 \\
+&\kappa=0.05 \\
+&\theta=0.87 \\
+&\omega_v=131.60 \\
+&\phi_v=5.24
+\end{split}
+\end{equation}
+
+Note that this makes:
+\begin{equation}
+\begin{split}
+&\sigma_v^2=159.02 \\
+&\rho=0.42
+\end{split}
+\end{equation}
+
+%Also, based on the model parameters, it seems reasonable to set $v_0=10$ and $y_0=100$.
+
+
+
+%Draws from the joint posterior of $(\sigma_v,\rho)$ can be obtained by drawing from the joint posterior of $(\phi_v,\omega_v)$ and then setting (Refer to Equations (5) and (6)):
+%\begin{equation}
+%\begin{cases}
+%\sigma_v^2=\omega_v+\phi_v^2 \\
+%\rho = \frac{\phi_v}{\sigma_v}
+%\end{cases}
+%\end{equation}
+
+%\section{Empirical Study: Commodity Prices}
+
+
+\end{document}

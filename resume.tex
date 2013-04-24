@@ -1,0 +1,51 @@
+% LaTeX resume using res.cls
+\documentclass[margin]{res}
+%\usepackage{helvetica} % uses helvetica postscript font (download helvetica.sty)
+%\usepackage{newcent}   % uses new century schoolbook postscript font 
+\setlength{\textwidth}{5.1in} % set width of text portion
+
+\begin{document}
+
+% Center the name over the entire width of resume:
+ \moveleft.5\hoffset\centerline{\large\bf Nathan Zimmerman}
+% Draw a horizontal line the whole width of resume:
+ \moveleft\hoffset\vbox{\hrule width\resumewidth height 1pt}\smallskip
+% address begins here
+% Again, the address lines must be centered over entire width of resume:
+ \moveleft.5\hoffset\centerline{3414 Snedecor Hall, Department of Statistics}
+ \moveleft.5\hoffset\centerline{Iowa State University, Ames, IA 50014}
+ \moveleft.5\hoffset\centerline{(319) 541-6426}
+ \moveleft.5\hoffset\centerline{Email: nathanz@iastate.edu}
+ \moveleft.5\hoffset\centerline{Website: nathanzim.com}
+
+\begin{resume}
+ 
+\section{OBJECTIVE}  A position in the field of data analysis, specifically with applications to finance or sports operations. \\
+
+\section{EDUCATION} {\sl M.S.,} Statistics (Advised by Dr. Cindy Yu) \hfill Expected Fall 2013 \\
+								Iowa State University, Ames, IA, 
+								
+								{\sl B.S.,} Mathematics \hfill May 2011  \\
+                      % \sl will be bold italic in New Century Schoolbook (or
+	              % any postscript font) and just slanted in
+		      %	Computer Modern (default) font
+                University of Iowa, Iowa City, IA,\\
+
+\section{EXPERIENCE} {\sl Graduate Teaching Assistant} \hfill            Fall 2011-Present \\
+                Iowa State University, Department of Statistics, Ames, IA
+                 \begin{itemize}  \itemsep -2pt %reduce space between items
+                 \item Course Instructor for Principles of Statistics
+                 \item Grading Supervisor for Principles of Statistics
+								 \item Lab Assistant for Principles of Statistics
+								 \item Lab Assistant for Statistical Methods for Research
+                \end{itemize}
+								
+\section{COMPUTER \\ SKILLS} {\sl Statistical Packages:} R, SAS, JMP\\
+														{\sl Languages/Software:} C, SQL, HTML, LaTeX, Git\\
+												
+\end{resume}
+\end{document}
+
+
+
+
